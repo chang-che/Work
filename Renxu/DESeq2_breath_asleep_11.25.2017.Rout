@@ -1,0 +1,227 @@
+
+R version 3.4.0 (2017-04-21) -- "You Stupid Darkness"
+Copyright (C) 2017 The R Foundation for Statistical Computing
+Platform: x86_64-redhat-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+[Previously saved workspace restored]
+
+> 
+> 
+> library(DESeq2)
+Loading required package: S4Vectors
+Loading required package: stats4
+Loading required package: BiocGenerics
+Loading required package: parallel
+
+Attaching package: ‘BiocGenerics’
+
+The following objects are masked from ‘package:parallel’:
+
+    clusterApply, clusterApplyLB, clusterCall, clusterEvalQ,
+    clusterExport, clusterMap, parApply, parCapply, parLapply,
+    parLapplyLB, parRapply, parSapply, parSapplyLB
+
+The following objects are masked from ‘package:stats’:
+
+    IQR, mad, sd, var, xtabs
+
+The following objects are masked from ‘package:base’:
+
+    anyDuplicated, append, as.data.frame, cbind, colMeans, colnames,
+    colSums, do.call, duplicated, eval, evalq, Filter, Find, get, grep,
+    grepl, intersect, is.unsorted, lapply, lengths, Map, mapply, match,
+    mget, order, paste, pmax, pmax.int, pmin, pmin.int, Position, rank,
+    rbind, Reduce, rowMeans, rownames, rowSums, sapply, setdiff, sort,
+    table, tapply, union, unique, unsplit, which, which.max, which.min
+
+
+Attaching package: ‘S4Vectors’
+
+The following object is masked from ‘package:base’:
+
+    expand.grid
+
+Loading required package: IRanges
+Loading required package: GenomicRanges
+Loading required package: GenomeInfoDb
+Loading required package: SummarizedExperiment
+Loading required package: Biobase
+Welcome to Bioconductor
+
+    Vignettes contain introductory material; view with
+    'browseVignettes()'. To cite Bioconductor, see
+    'citation("Biobase")', and for packages 'citation("pkgname")'.
+
+Loading required package: DelayedArray
+Loading required package: matrixStats
+
+Attaching package: ‘matrixStats’
+
+The following objects are masked from ‘package:Biobase’:
+
+    anyMissing, rowMedians
+
+
+Attaching package: ‘DelayedArray’
+
+The following objects are masked from ‘package:matrixStats’:
+
+    colMaxs, colMins, colRanges, rowMaxs, rowMins, rowRanges
+
+The following object is masked from ‘package:base’:
+
+    apply
+
+> load(file='/export/home/xurren/WTCProject/Data/clinical533newsleep_reordered.RData')
+> load('/export/home/pfkuan/WTCproject/Epigenetics/Data/RNASeq/ProcessedData_533Samples/ExonCounts533.RData')
+> 
+> clinical = clinical[1:330, ] ## this file only deal with batch 3 samples
+> exoncounts = exoncounts[, 1:330]
+> exoncounts = exoncounts[, -which(clinical$smoker==1 | clinical$Gender==1)]
+> clinical = clinical[-which(clinical$smoker==1 | clinical$Gender==1), ]  ## remove female and smokers
+> 
+> race1 = rep(NA, dim(clinical)[1])
+> race1[clinical$race8==7] = 1
+> race1[clinical$race8!=7] = 0
+> race1 = factor(race1)
+> 
+> age = clinical$age_RNA
+> 
+> stop_breath = clinical$stop_breath
+> daytime_sleep = clinical$daytime_sleep
+> fall_stay_asleep = clinical$fall_stay_asleep
+> difficulty_fall_stay_asleep = clinical$difficulty_fall_stay_asleep
+> 
+> coldata = data.frame(age = age, race1 = race1, 
++                      stop_breath = stop_breath, daytime_sleep = daytime_sleep, 
++                      fall_stay_asleep = fall_stay_asleep, difficulty_fall_stay_asleep = difficulty_fall_stay_asleep)
+> rownames(coldata) = clinical$w_mrn
+> 
+> ###########################################################################################################################################
+> ## 1) DESeq on stop_breath
+> ind = which(stop_breath==0 | stop_breath==1)
+> coldata1 = coldata[ind, ]
+> coldata1$stop_breath = as.factor(coldata1$stop_breath)
+> exoncounts1 = exoncounts[, ind]
+> 
+> dds_stop_breath = DESeqDataSetFromMatrix(countData = exoncounts1, colData = coldata1, design = ~ stop_breath + age + race1)
+the design formula contains a numeric variable with integer values,
+  specifying a model with increasing fold change for higher values.
+  did you mean for this to be a factor? if so, first convert
+  this variable to a factor using the factor() function
+> dds_stop_breath = DESeq(dds_stop_breath)
+estimating size factors
+estimating dispersions
+gene-wise dispersion estimates
+mean-dispersion relationship
+final dispersion estimates
+fitting model and testing
+-- replacing outliers and refitting for 11 genes
+-- DESeq argument 'minReplicatesForReplace' = 7 
+-- original counts are preserved in counts(dds)
+estimating dispersions
+fitting model and testing
+> res_stop_breath = results(dds_stop_breath, contrast = c("stop_breath", "1", "0"))
+> 
+> 
+> ###########################################################################################################################################
+> ## 2) DESeq on daytime_sleep
+> ind2 = which(!is.na(daytime_sleep))
+> coldata2 = coldata[ind2, ]
+> coldata2$daytime_sleep = as.factor(coldata2$daytime_sleep)
+> exoncounts2 = exoncounts[, ind2]
+> 
+> dds_daytime_sleep = DESeqDataSetFromMatrix(countData = exoncounts2, colData = coldata2, design = ~ daytime_sleep + age + race1)
+the design formula contains a numeric variable with integer values,
+  specifying a model with increasing fold change for higher values.
+  did you mean for this to be a factor? if so, first convert
+  this variable to a factor using the factor() function
+> dds_daytime_sleep = DESeq(dds_daytime_sleep)
+estimating size factors
+estimating dispersions
+gene-wise dispersion estimates
+mean-dispersion relationship
+final dispersion estimates
+fitting model and testing
+-- replacing outliers and refitting for 14 genes
+-- DESeq argument 'minReplicatesForReplace' = 7 
+-- original counts are preserved in counts(dds)
+estimating dispersions
+fitting model and testing
+> res_daytime_sleep = results(dds_daytime_sleep, contrast = c("daytime_sleep", "1", "0"))
+> 
+> 
+> ###########################################################################################################################################
+> ## 3) DESeq on fall_stay_asleep
+> ind3 = which(!is.na(fall_stay_asleep))
+> coldata3 = coldata[ind3, ]
+> exoncounts3 = exoncounts[, ind3]
+> 
+> dds_fall_stay_asleep = DESeqDataSetFromMatrix(countData = exoncounts3, colData = coldata3, design = ~ fall_stay_asleep + age + race1)
+the design formula contains a numeric variable with integer values,
+  specifying a model with increasing fold change for higher values.
+  did you mean for this to be a factor? if so, first convert
+  this variable to a factor using the factor() function
+> dds_fall_stay_asleep = DESeq(dds_fall_stay_asleep)
+estimating size factors
+estimating dispersions
+gene-wise dispersion estimates
+mean-dispersion relationship
+final dispersion estimates
+fitting model and testing
+-- replacing outliers and refitting for 12 genes
+-- DESeq argument 'minReplicatesForReplace' = 7 
+-- original counts are preserved in counts(dds)
+estimating dispersions
+fitting model and testing
+> res_fall_stay_asleep = results(dds_fall_stay_asleep, name = "fall_stay_asleep")
+> 
+> ###########################################################################################################################################
+> ## 4) DESeq on difficulty_fall_stay_asleep
+> ind4 = which(!is.na(difficulty_fall_stay_asleep))
+> coldata4 = coldata[ind4, ]
+> coldata4$difficulty_fall_stay_asleep = as.factor(coldata4$difficulty_fall_stay_asleep)
+> exoncounts4 = exoncounts[, ind4]
+> 
+> dds_difficulty_fall_stay_asleep = DESeqDataSetFromMatrix(countData = exoncounts4, colData = coldata4, design = ~ difficulty_fall_stay_asleep + age + race1)
+the design formula contains a numeric variable with integer values,
+  specifying a model with increasing fold change for higher values.
+  did you mean for this to be a factor? if so, first convert
+  this variable to a factor using the factor() function
+> dds_difficulty_fall_stay_asleep = DESeq(dds_difficulty_fall_stay_asleep)
+estimating size factors
+estimating dispersions
+gene-wise dispersion estimates
+mean-dispersion relationship
+final dispersion estimates
+fitting model and testing
+-- replacing outliers and refitting for 9 genes
+-- DESeq argument 'minReplicatesForReplace' = 7 
+-- original counts are preserved in counts(dds)
+estimating dispersions
+fitting model and testing
+> res_difficulty_fall_stay_asleep = results(dds_difficulty_fall_stay_asleep, contrast = c("difficulty_fall_stay_asleep", "1", "0"))
+> 
+> 
+> save(res_stop_breath, res_daytime_sleep, res_fall_stay_asleep, res_difficulty_fall_stay_asleep, 
++      file = '/export/home/xurren/WTCProject/Results/res_breath_sleep.RData')
+> 
+> 
+> 
+> proc.time()
+    user   system  elapsed 
+2998.548    2.743 3001.346 

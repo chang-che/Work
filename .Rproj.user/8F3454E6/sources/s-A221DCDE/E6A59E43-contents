@@ -1,0 +1,18 @@
+library(DESeq2)
+xcell <- read.table('/export/home/chche/WTC_Project/Data/xCell_xcell_xCell_1852040918.txt', header = T, sep ='\t')
+MDDstat <- read.table('/export/home/pfkuan/WTCproject/Epigenetics/Data/levinsonNIMH_MDD_EQTL_Covariates/data_used_for_MDD_analysis/Dx_Case_status.txt', header = T, sep ='\t')
+MDD.status <- MDDstat$MDD.status
+
+CD4T = t(xcell[5,-1])
+Bcell = t(xcell[3,-1])
+CD8T = t(xcell[10,-1])
+Mono = t(xcell[39,-1])
+NK = xcell[41,-1] # for later use
+coldata922 <- data.frame(age,CD4T,Bcell,CD8T, Mono, MDD.status)
+colnames(coldata922) <- c('age', 'CD4T', 'Bcell','CD8T', 'Mono','MDD')
+
+x = DESeqDataSetFromMatrix(countData = t(MDD_inte), 
+                       colData = coldata922, design = ~ MDD+age+CD4T+CD8T+Bcell+Mono)
+MDD922 = DESeq(x)
+res922MDD = results(MDD922, contrast = c("MDD1", "1", "0"))
+save(res922M, file = '/export/home/chche/WTC_Project/Data/res922M.Rdata')

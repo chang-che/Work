@@ -1,0 +1,23 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1523664083786.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "A64FB60",
+    "lastKnownWriteTime" : 1523665559,
+    "last_content_update" : 1523665559093,
+    "path" : "~/My/Study/Work/April_13th.R",
+    "project_path" : "April_13th.R",
+    "properties" : {
+        "cursorPosition" : "14,36",
+        "scrollLine" : "0",
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 14,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

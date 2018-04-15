@@ -1,0 +1,2 @@
+'cluster', 'codetools','lattice', 'Matrix', 'nlme', 'spatial'
+'RCurl', 'XML', 'GenomeInfoDb', 'annotate', 'GenomicRanges', 'SummarizedExperiment', 'genefilter', 'geneplotter'

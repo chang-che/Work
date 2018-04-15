@@ -1,0 +1,246 @@
+
+R version 3.4.0 (2017-04-21) -- "You Stupid Darkness"
+Copyright (C) 2017 The R Foundation for Statistical Computing
+Platform: x86_64-redhat-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+[Previously saved workspace restored]
+
+> # Analysis of the variables in the response.
+> library(ggplot2)
+> library(ggpubr)
+Loading required package: magrittr
+> library(remMap)
+> library(glmnet)
+Loading required package: Matrix
+Loading required package: foreach
+Loaded glmnet 2.0-13
+
+> library(grid)
+> library(gridExtra)
+> library(gplots)
+
+Attaching package: ‘gplots’
+
+The following object is masked from ‘package:stats’:
+
+    lowess
+
+> getplot = function(main, xlab, ylab, pred, truelabel){
++   setTitle = main
++   df <- data.frame(pred=as.vector(pred),true=truelabel)
++   p1 = ggplot(df, aes(x=pred, y=true)) +
++     geom_point(shape=19,size=1) +   # Use hollow circles
++     geom_smooth(method=lm)+ggtitle(setTitle)+ 
++     theme(text = element_text(size=10),legend.text=element_text(size=10),legend.title=element_blank()) +
++     xlab(xlab) +
++     ylab(ylab) +
++     theme(plot.title = element_text(hjust = 0.5))+stat_cor(method = "pearson")
++   return(p1)
++ }
+> 
+> # Multiple plot function
+> #
+> # ggplot objects can be passed in ..., or to plotlist (as a list of ggplot objects)
+> # - cols:   Number of columns in layout
+> # - layout: A matrix specifying the layout. If present, 'cols' is ignored.
+> #
+> # If the layout is something like matrix(c(1,2,3,3), nrow=2, byrow=TRUE),
+> # then plot 1 will go in the upper left, 2 will go in the upper right, and
+> # 3 will go all the way across the bottom.
+> #
+> multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
++   library(grid)
++   
++   # Make a list from the ... arguments and plotlist
++   plots <- c(list(...), plotlist)
++   
++   numPlots = length(plots)
++   
++   # If layout is NULL, then use 'cols' to determine layout
++   if (is.null(layout)) {
++     # Make the panel
++     # ncol: Number of columns of plots
++     # nrow: Number of rows needed, calculated from # of cols
++     layout <- matrix(seq(1, cols * ceiling(numPlots/cols)),
++                      ncol = cols, nrow = ceiling(numPlots/cols))
++   }
++   
++   if (numPlots==1) {
++     print(plots[[1]])
++     
++   } else {
++     # Set up the page
++     grid.newpage()
++     pushViewport(viewport(layout = grid.layout(nrow(layout), ncol(layout))))
++     
++     # Make each plot, in the correct location
++     for (i in 1:numPlots) {
++       # Get the i,j matrix positions of the regions that contain this subplot
++       matchidx <- as.data.frame(which(layout == i, arr.ind = TRUE))
++       
++       print(plots[[i]], vp = viewport(layout.pos.row = matchidx$row,
++                                       layout.pos.col = matchidx$col))
++     }
++   }
++ }
+> 
+> 
+> load(file = '/export/home/xurren/WTCProject/Data/clinical533_02_17_2018.RData')  ## load clinical data
+> load(file="/export/home/xurren/WTCProject/Data/ExonCountsNormalize533.RData")   ## load normalized exoncounts
+> load(file = '/export/home/xurren/WTCProject/Data/exon330_genefilter.RData') 
+> 
+> ####################################################################################
+> # trying remMap on "PCL", "PHQ9", "LRS_total"
+> listofn = c("PCL", "PHQ9", "LRS_total")
+> exon.norm.log = log2(exoncounts_normalized+1)  ## log transform normalized exoncounts
+> exon.norm.log = exon.norm.log[keep,]
+> exon.norm.log = t(exon.norm.log)
+> 
+> # delete the missing value and standardize both the response and predictor.
+> ind = which(clinical$batch==3 & clinical$Gender==0 & !is.na(clinical$PCL) & !is.na(clinical$PHQ9) & !is.na(clinical$LRS_total))
+> exon.norm.log_1st = exon.norm.log[ind,]
+> X.m1 = scale(exon.norm.log_1st)
+> 
+> Y.m1 = cbind(clinical$PCL, clinical$PHQ9, clinical$LRS_total)
+> colnames(Y.m1) = listofn
+> Y.m1 = Y.m1[ind,]
+> Y.m1 = scale(Y.m1)
+> 
+> #Create 10 sets of train and test data with size ratio 7:3
+> listofcor_remMap = list()
+> listofcor_Elastic = list()
+> listofbeta_remMap = list()
+> listofbeta_Elastic = list()
+> 
+> for (i in 1:5) 
++   {
++   testIndexes <- sample(nrow(X.m1), floor(nrow(X.m1)*0.3))
++   X.testData <- X.m1[testIndexes, ]
++   Y.testData <- Y.m1[testIndexes, ]
++   X.trainData <- X.m1[-testIndexes, ]
++   Y.trainData <- Y.m1[-testIndexes, ]
++   print(testIndexes)
++   ## Tuning the parameters
++   lamL1.v = exp(seq(log(10),log(20), length=3)) 
++   lamL2.v = seq(0,5, length=3)
++   list_4  = remMap.CV(X.trainData, Y.trainData, lamL1.v, lamL2.v, C.m=NULL, fold=10, seed=1)
++   
++   ##############################################################
++   #############Use remMap method
++   #### use CV based on unshrinked estimator (ols.cv) 
++   pick=which.min(as.vector(list_4$ols.cv))
++   lamL1.pick=list_4$l.index[1,pick]  ##find the optimal (LamL1,LamL2) based on the cv score 
++   lamL2.pick=list_4$l.index[2,pick]
++   
++   ##fit the remMap model under the optimal (LamL1,LamL2).
++   result_1 = remMap(X.trainData, Y.trainData,lamL1=lamL1.pick, lamL2=lamL2.pick, phi0=NULL, C.m=NULL) 
++   
++   ## get the coefficients matrix
++   phi.m = result_1$phi
++   
++   rownames(phi.m) = colnames(exon.norm.log_1st)
++   # get the fitted values for test data
++   Y.fitted1 = as.data.frame(X.testData%*%phi.m)
++   colnames(Y.fitted1) = listofn
++   Y.testData = as.data.frame(Y.testData)
++   
++   listofcor <-  c()
++   listofbeta <-  list()
++   
++   for (j in 1:length(listofn)) {
++     
++     listofbeta[[j]] = list(names(phi.m[,j][phi.m[,j]!=0]))
++     listofcor[j] = cor(Y.fitted1[[j]], Y.testData[[j]]) 
++   }
++   
++   listofcor_remMap[[i]] <-  listofcor
++   listofbeta_remMap[[i]] <-  listofbeta
++   ##### examine the performance when using the test data.
++   
++   
++   ##########################################################
++   #Use the Elastic Net method
++   trainX_data = as.matrix(X.trainData)
++   listofcor <-  c()
++   listofbeta <-  list()
++   
++   for (j in 1:length(listofn)) {
++     trainY_data = as.matrix(Y.trainData[,j])
++     alpha_cand = seq(0, 1, 0.3) ## candidate alpha values
++     cvms = rep(0, length(alpha_cand)) ## cvms stores the minimum cross validation rate for each alpha
++     cvElaNet = lapply(alpha_cand, function(a){ cv.glmnet(x = trainX_data, y = trainY_data, family = "gaussian",
++                                                          nfolds = 5, alpha = a, type.measure = "mae") } )
++     for(k in 1:length(alpha_cand)){
++       
++       cvms[k] = min(cvElaNet[[k]]$cvm)
++       
++     }
++     opt_alpha = alpha_cand[which.min(cvms)]
++     opt_lambda = cvElaNet[[which.min(cvms)]]$lambda.1se
++     opt_model = cvElaNet[[which.min(cvms)]]
++     cvElaNet_pred = predict(opt_model, newx = X.testData, s = opt_lambda, type = "response")
++     
++     ###store pearson correlation value in a vector
++     listofcor[j] <- cor(cvElaNet_pred, Y.testData[,j])
++     
++     ### get the names of genes with non-zero coefficients respectively for Elastic Net
++     listofbeta[[j]] = list(names(coef(opt_model)[coef(opt_model)[,1]!=0,]))
++     
++   }
++   
++   listofcor_Elastic[[i]] = listofcor
++   listofbeta_Elastic[[i]] = listofbeta
++ }
+ [1]  92 121 257  73 306 191 312 311 236  18 157 261 298 120 141 126 273 144 279
+[20]  37 166 215   1 183 108  25 195 175  28 114 286 225 231 285 292 170 165 253
+[39] 109 266  70  39 143 124 300  24 161 291 147 278  79  75 158  44 239 308 193
+[58] 127 260 262 100  50 182 235 174 222  57 136  51 132 237 196 277  97 199 106
+[77]  95   8  33 160  15 233  27 145   6  16  43 252 189 164  63 297 213 119
+ [1]  92 121 257  73 306 191 312 311 236  18 157 261 298 120 141 126 273 144 279
+[20]  37 166 215   1 183 108  25 195 175  28 114 286 225 231 285 292 170 165 253
+[39] 109 266  70  39 143 124 300  24 161 291 147 278  79  75 158  44 239 308 193
+[58] 127 260 262 100  50 182 235 174 222  57 136  51 132 237 196 277  97 199 106
+[77]  95   8  33 160  15 233  27 145   6  16  43 252 189 164  63 297 213 119
+ [1]  92 121 257  73 306 191 312 311 236  18 157 261 298 120 141 126 273 144 279
+[20]  37 166 215   1 183 108  25 195 175  28 114 286 225 231 285 292 170 165 253
+[39] 109 266  70  39 143 124 300  24 161 291 147 278  79  75 158  44 239 308 193
+[58] 127 260 262 100  50 182 235 174 222  57 136  51 132 237 196 277  97 199 106
+[77]  95   8  33 160  15 233  27 145   6  16  43 252 189 164  63 297 213 119
+ [1]  92 121 257  73 306 191 312 311 236  18 157 261 298 120 141 126 273 144 279
+[20]  37 166 215   1 183 108  25 195 175  28 114 286 225 231 285 292 170 165 253
+[39] 109 266  70  39 143 124 300  24 161 291 147 278  79  75 158  44 239 308 193
+[58] 127 260 262 100  50 182 235 174 222  57 136  51 132 237 196 277  97 199 106
+[77]  95   8  33 160  15 233  27 145   6  16  43 252 189 164  63 297 213 119
+ [1]  92 121 257  73 306 191 312 311 236  18 157 261 298 120 141 126 273 144 279
+[20]  37 166 215   1 183 108  25 195 175  28 114 286 225 231 285 292 170 165 253
+[39] 109 266  70  39 143 124 300  24 161 291 147 278  79  75 158  44 239 308 193
+[58] 127 260 262 100  50 182 235 174 222  57 136  51 132 237 196 277  97 199 106
+[77]  95   8  33 160  15 233  27 145   6  16  43 252 189 164  63 297 213 119
+Warning messages:
+1: In cor(cvElaNet_pred, Y.testData[, j]) : the standard deviation is zero
+2: In cor(cvElaNet_pred, Y.testData[, j]) : the standard deviation is zero
+3: In cor(cvElaNet_pred, Y.testData[, j]) : the standard deviation is zero
+4: In cor(cvElaNet_pred, Y.testData[, j]) : the standard deviation is zero
+5: In cor(cvElaNet_pred, Y.testData[, j]) : the standard deviation is zero
+> 
+> 
+> 
+> 
+> 
+> proc.time()
+   user  system elapsed 
+935.193   0.697 935.876 

@@ -1,0 +1,9 @@
+{
+    "path" : "~/My/Study/Work",
+    "sortOrder" : [
+        {
+            "ascending" : true,
+            "columnIndex" : 2
+        }
+    ]
+}

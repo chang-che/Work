@@ -1,0 +1,269 @@
+
+R version 3.4.0 (2017-04-21) -- "You Stupid Darkness"
+Copyright (C) 2017 The R Foundation for Statistical Computing
+Platform: x86_64-redhat-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+[Previously saved workspace restored]
+
+> ##  principal component analysis on WTCProjectGeneCountsNormalize533.RData and WTCProjectFPKM533.RData
+> 
+> library(ggplot2)
+> library(grid)
+> library(gridExtra)
+> 
+> dataPathRNASeq <- '/export/home/pfkuan/WTCproject/Epigenetics/Data/RNASeq/ProcessedData_533Samples/'
+> load(file=paste(dataPathRNASeq,'FPKM533.RData',sep=''))
+> load(file = '/export/home/xurren/WTCProject/Data/ExonCountsNormalize533.RData')   ## load exon counts 
+> # load(file = '/export/home/xurren/WTCProject/Data/GeneCountsNormalize533.RData')
+> ##  dim(genecounts_normalized)
+> ##  dim(fpkm)
+> batch = c(rep("old", 330), rep("new", 203))
+> 
+> genecounts_normalized = exoncounts_normalized
+> 
+> medianAbsoluteDeviation = apply(genecounts_normalized, 1, mad)
+> ##  length(medianAbsoluteDeviation)
+> ##  order the medianAbsoluteDeviation
+> order_ind = order(medianAbsoluteDeviation, decreasing = TRUE)
+> ##  select 200 top deviance genes
+> Num = 200
+> topDevianceGene = genecounts_normalized[order_ind, ]
+> topDevianceGene = topDevianceGene[1:Num, ]
+> ##  apply(topDevianceGene, 1, mad)
+> ##  dim(topDevianceGene)
+> dataPath = '/export/home/xurren/WTCProject/Data/'
+> save(topDevianceGene, file = paste(dataPath, 'TopDevianceGene.RData', sep = ''))
+> 
+> ##  do PCA on topDevianceGene
+> prinCompAnalysis = prcomp(t(topDevianceGene), retx = TRUE, center = TRUE, scale = TRUE)
+> pcVariance = prinCompAnalysis$sdev^2
+> pcProportion = pcVariance/sum(pcVariance)
+> pcProportion
+  [1] 3.253605e-01 2.129612e-01 1.051058e-01 6.247951e-02 3.190230e-02
+  [6] 2.799562e-02 1.950580e-02 1.718336e-02 1.576385e-02 1.250387e-02
+ [11] 1.069247e-02 8.447815e-03 7.900279e-03 7.714450e-03 7.322431e-03
+ [16] 6.183572e-03 5.734274e-03 5.352512e-03 5.200758e-03 5.001840e-03
+ [21] 4.173276e-03 3.700088e-03 3.362738e-03 3.284404e-03 3.069440e-03
+ [26] 2.997459e-03 2.758103e-03 2.590018e-03 2.464557e-03 2.271931e-03
+ [31] 2.150450e-03 2.084492e-03 2.000734e-03 1.955938e-03 1.789664e-03
+ [36] 1.713647e-03 1.691654e-03 1.590680e-03 1.541469e-03 1.516557e-03
+ [41] 1.458541e-03 1.398750e-03 1.391369e-03 1.340185e-03 1.248587e-03
+ [46] 1.203949e-03 1.196519e-03 1.143144e-03 1.138428e-03 1.085337e-03
+ [51] 1.041444e-03 1.022781e-03 9.873288e-04 9.601052e-04 9.060261e-04
+ [56] 8.952858e-04 8.652350e-04 8.201474e-04 8.094990e-04 7.973585e-04
+ [61] 7.376073e-04 7.289234e-04 7.018823e-04 6.760948e-04 6.571331e-04
+ [66] 6.495310e-04 6.272182e-04 6.136577e-04 5.930261e-04 5.637495e-04
+ [71] 5.574834e-04 5.407012e-04 5.298159e-04 5.063602e-04 4.949203e-04
+ [76] 4.863050e-04 4.787317e-04 4.629642e-04 4.509641e-04 4.447674e-04
+ [81] 4.294342e-04 4.202243e-04 4.153170e-04 4.065184e-04 3.981040e-04
+ [86] 3.824783e-04 3.739535e-04 3.645572e-04 3.639648e-04 3.486958e-04
+ [91] 3.388395e-04 3.332946e-04 3.293230e-04 3.143864e-04 3.060555e-04
+ [96] 2.991619e-04 2.944894e-04 2.909733e-04 2.818681e-04 2.747774e-04
+[101] 2.697964e-04 2.606270e-04 2.494684e-04 2.475574e-04 2.453714e-04
+[106] 2.409186e-04 2.314883e-04 2.299851e-04 2.256425e-04 2.190523e-04
+[111] 2.127042e-04 2.122565e-04 2.079588e-04 2.020339e-04 1.976447e-04
+[116] 1.942305e-04 1.890645e-04 1.827391e-04 1.813468e-04 1.764356e-04
+[121] 1.726427e-04 1.704403e-04 1.676874e-04 1.654645e-04 1.586551e-04
+[126] 1.565997e-04 1.543333e-04 1.517786e-04 1.477832e-04 1.462002e-04
+[131] 1.398322e-04 1.356902e-04 1.345312e-04 1.329034e-04 1.301486e-04
+[136] 1.248396e-04 1.220810e-04 1.198251e-04 1.183642e-04 1.170988e-04
+[141] 1.129646e-04 1.121421e-04 1.054222e-04 1.041470e-04 1.019895e-04
+[146] 9.811795e-05 9.740118e-05 9.583266e-05 9.263524e-05 9.147813e-05
+[151] 9.132840e-05 9.048134e-05 8.517892e-05 8.462659e-05 8.245938e-05
+[156] 7.996636e-05 7.886151e-05 7.712199e-05 7.517357e-05 7.280802e-05
+[161] 7.173574e-05 6.988792e-05 6.864668e-05 6.726686e-05 6.561623e-05
+[166] 6.336764e-05 6.268438e-05 6.077823e-05 6.020912e-05 5.769502e-05
+[171] 5.586435e-05 5.418818e-05 5.317173e-05 5.148795e-05 5.118807e-05
+[176] 4.999458e-05 4.710446e-05 4.599688e-05 4.510368e-05 4.393311e-05
+[181] 4.266495e-05 4.180156e-05 4.022061e-05 3.987414e-05 3.878176e-05
+[186] 3.819181e-05 3.701779e-05 3.464644e-05 3.342732e-05 3.210353e-05
+[191] 2.813154e-05 2.644209e-05 2.560627e-05 2.429812e-05 2.334146e-05
+[196] 2.212786e-05 2.044636e-05 1.857325e-05 8.751154e-06 6.477215e-06
+> cumsum(pcProportion)
+  [1] 0.3253605 0.5383217 0.6434275 0.7059070 0.7378093 0.7658049 0.7853107
+  [8] 0.8024941 0.8182579 0.8307618 0.8414543 0.8499021 0.8578024 0.8655168
+ [15] 0.8728393 0.8790228 0.8847571 0.8901096 0.8953104 0.9003122 0.9044855
+ [22] 0.9081856 0.9115483 0.9148327 0.9179022 0.9208996 0.9236577 0.9262478
+ [29] 0.9287123 0.9309842 0.9331347 0.9352192 0.9372199 0.9391759 0.9409655
+ [36] 0.9426792 0.9443708 0.9459615 0.9475030 0.9490195 0.9504781 0.9518768
+ [43] 0.9532682 0.9546084 0.9558570 0.9570609 0.9582574 0.9594006 0.9605390
+ [50] 0.9616243 0.9626658 0.9636886 0.9646759 0.9656360 0.9665420 0.9674373
+ [57] 0.9683025 0.9691227 0.9699322 0.9707295 0.9714672 0.9721961 0.9728980
+ [64] 0.9735741 0.9742312 0.9748807 0.9755079 0.9761216 0.9767146 0.9772784
+ [71] 0.9778358 0.9783766 0.9789064 0.9794127 0.9799076 0.9803940 0.9808727
+ [78] 0.9813356 0.9817866 0.9822314 0.9826608 0.9830810 0.9834964 0.9839029
+ [85] 0.9843010 0.9846835 0.9850574 0.9854220 0.9857859 0.9861346 0.9864735
+ [92] 0.9868068 0.9871361 0.9874505 0.9877565 0.9880557 0.9883502 0.9886412
+ [99] 0.9889230 0.9891978 0.9894676 0.9897282 0.9899777 0.9902252 0.9904706
+[106] 0.9907115 0.9909430 0.9911730 0.9913987 0.9916177 0.9918304 0.9920427
+[113] 0.9922506 0.9924527 0.9926503 0.9928445 0.9930336 0.9932163 0.9933977
+[120] 0.9935741 0.9937468 0.9939172 0.9940849 0.9942504 0.9944090 0.9945656
+[127] 0.9947199 0.9948717 0.9950195 0.9951657 0.9953055 0.9954412 0.9955758
+[134] 0.9957087 0.9958388 0.9959636 0.9960857 0.9962056 0.9963239 0.9964410
+[141] 0.9965540 0.9966661 0.9967715 0.9968757 0.9969777 0.9970758 0.9971732
+[148] 0.9972690 0.9973617 0.9974531 0.9975445 0.9976350 0.9977201 0.9978048
+[155] 0.9978872 0.9979672 0.9980461 0.9981232 0.9981983 0.9982712 0.9983429
+[162] 0.9984128 0.9984814 0.9985487 0.9986143 0.9986777 0.9987404 0.9988011
+[169] 0.9988613 0.9989190 0.9989749 0.9990291 0.9990823 0.9991338 0.9991849
+[176] 0.9992349 0.9992820 0.9993280 0.9993731 0.9994171 0.9994597 0.9995015
+[183] 0.9995418 0.9995816 0.9996204 0.9996586 0.9996956 0.9997303 0.9997637
+[190] 0.9997958 0.9998239 0.9998504 0.9998760 0.9999003 0.9999236 0.9999458
+[197] 0.9999662 0.9999848 0.9999935 1.0000000
+> pc1 = prinCompAnalysis$x[, 1]
+> pc2 = prinCompAnalysis$x[, 2]
+> pc3 = prinCompAnalysis$x[, 3]
+> 
+> resultsPath = '/export/home/xurren/WTCProject/Results/'
+> # pdf(file = paste(resultsPath, "PC_plots_for_normalized_counts.pdf", sep = ''),  width=10, height=10)
+> pdf(file = paste(resultsPath, "PC_plots_for_normalized_exon_counts.pdf", sep = ''),  width=10, height=10)
+> df1 = data.frame(PC1=pc1, PC2=pc2)
+> p1 = ggplot(df1, aes(x=PC1, y=PC2, color = batch)) + geom_point()
+> df2 = data.frame(PC1=pc1, PC3=pc3)
+> p2 = ggplot(df2, aes(x=PC1, y=PC3, color = batch)) + geom_point()
+> df3 = data.frame(PC2=pc2, PC3=pc3)
+> p3 = ggplot(df3, aes(x=PC2, y=PC3, color = batch)) + geom_point()
+> # grid.arrange(p1, p2, p3, ncol=2, top = "PC plots for normalized counts")
+> grid.arrange(p1, p2, p3, ncol=2, top = "PC plots for normalized exon counts")
+> dev.off()
+null device 
+          1 
+> 
+> #######################################################################################################
+> 
+> ##  PCA plot on FPKM
+> mad_FPKM = apply(fpkm, 1, mad)
+> order_ind_FPKM = order(mad_FPKM, decreasing = TRUE)
+> ##  select 200 top deviance genes
+> Num = 200
+> topDevianceGene_FPKM = fpkm[order_ind_FPKM, ]
+> topDevianceGene_FPKM = topDevianceGene_FPKM[1:Num, ]
+> save(topDevianceGene_FPKM, file = paste(dataPath, 'TopDevianceGeneFPKM.RData', sep = ''))
+> 
+> ##  do PCA on topDevianceGene_fpkm
+> pcAnalysis_FPKM = prcomp(t(topDevianceGene_FPKM), retx = TRUE, center = TRUE, scale = TRUE)
+> pcVariance_FPKM = pcAnalysis_FPKM$sdev^2
+> pcProportion_FPKM = pcVariance_FPKM/sum(pcVariance_FPKM)
+> pcProportion_FPKM
+  [1] 3.890683e-01 1.443084e-01 1.307116e-01 1.055227e-01 2.887035e-02
+  [6] 2.384686e-02 1.590003e-02 1.415423e-02 1.214526e-02 9.612848e-03
+ [11] 7.896464e-03 7.263139e-03 6.447219e-03 6.283669e-03 4.946593e-03
+ [16] 4.623400e-03 4.264517e-03 3.917055e-03 3.790835e-03 3.564339e-03
+ [21] 3.181319e-03 2.912162e-03 2.784594e-03 2.748980e-03 2.383881e-03
+ [26] 2.163233e-03 2.104199e-03 2.077732e-03 1.874103e-03 1.800433e-03
+ [31] 1.709759e-03 1.675903e-03 1.613200e-03 1.474448e-03 1.455022e-03
+ [36] 1.391735e-03 1.261455e-03 1.232144e-03 1.173728e-03 1.157494e-03
+ [41] 1.095728e-03 1.050851e-03 1.040162e-03 9.554432e-04 9.247764e-04
+ [46] 8.794581e-04 8.649036e-04 8.111645e-04 7.897178e-04 7.739098e-04
+ [51] 7.526867e-04 7.407015e-04 7.101971e-04 6.613594e-04 6.235158e-04
+ [56] 6.129247e-04 5.827474e-04 5.768782e-04 5.506596e-04 5.439802e-04
+ [61] 5.336031e-04 4.824237e-04 4.777859e-04 4.666927e-04 4.614092e-04
+ [66] 4.544892e-04 4.326903e-04 4.193774e-04 4.040070e-04 3.995185e-04
+ [71] 3.906385e-04 3.783252e-04 3.741678e-04 3.578059e-04 3.501074e-04
+ [76] 3.424363e-04 3.383039e-04 3.130616e-04 3.095621e-04 2.991753e-04
+ [81] 2.917858e-04 2.851396e-04 2.751306e-04 2.711359e-04 2.661701e-04
+ [86] 2.571226e-04 2.518844e-04 2.407556e-04 2.368171e-04 2.341127e-04
+ [91] 2.252347e-04 2.187936e-04 2.173043e-04 2.123906e-04 2.057689e-04
+ [96] 2.049292e-04 1.971705e-04 1.901264e-04 1.891023e-04 1.869945e-04
+[101] 1.818680e-04 1.803562e-04 1.713370e-04 1.648079e-04 1.623536e-04
+[106] 1.575167e-04 1.565221e-04 1.513363e-04 1.481268e-04 1.423247e-04
+[111] 1.417503e-04 1.385704e-04 1.376342e-04 1.320176e-04 1.317466e-04
+[116] 1.224961e-04 1.220355e-04 1.199328e-04 1.178303e-04 1.121620e-04
+[121] 1.119651e-04 1.094101e-04 1.079253e-04 1.048384e-04 1.015354e-04
+[126] 9.872045e-05 9.689417e-05 9.517239e-05 9.410609e-05 9.052122e-05
+[131] 8.754981e-05 8.709919e-05 8.403575e-05 8.113774e-05 7.974790e-05
+[136] 7.776364e-05 7.631968e-05 7.428264e-05 7.285780e-05 7.053314e-05
+[141] 6.932968e-05 6.654781e-05 6.503899e-05 6.382578e-05 6.037155e-05
+[146] 5.942337e-05 5.901908e-05 5.727442e-05 5.582414e-05 5.360872e-05
+[151] 4.979274e-05 4.918158e-05 4.842437e-05 4.684104e-05 4.625746e-05
+[156] 4.367248e-05 4.235002e-05 4.142875e-05 4.055056e-05 3.884147e-05
+[161] 3.788258e-05 3.632997e-05 3.554581e-05 3.462424e-05 3.311907e-05
+[166] 3.176977e-05 3.002515e-05 2.978596e-05 2.909227e-05 2.881351e-05
+[171] 2.742236e-05 2.529366e-05 2.499552e-05 2.426385e-05 2.312397e-05
+[176] 2.076755e-05 1.957984e-05 1.889466e-05 1.861396e-05 1.770715e-05
+[181] 1.676568e-05 1.659970e-05 1.513535e-05 1.463618e-05 1.397183e-05
+[186] 1.294030e-05 1.279238e-05 1.213111e-05 1.139601e-05 1.109167e-05
+[191] 1.044016e-05 9.757985e-06 9.037732e-06 8.561457e-06 7.738646e-06
+[196] 7.259216e-06 4.399283e-06 3.427635e-06 3.054750e-06 9.509592e-35
+> cumsum(pcProportion_FPKM)
+  [1] 0.3890683 0.5333767 0.6640883 0.7696109 0.7984813 0.8223281 0.8382282
+  [8] 0.8523824 0.8645276 0.8741405 0.8820370 0.8893001 0.8957473 0.9020310
+ [15] 0.9069776 0.9116010 0.9158655 0.9197826 0.9235734 0.9271377 0.9303190
+ [22] 0.9332312 0.9360158 0.9387648 0.9411487 0.9433119 0.9454161 0.9474938
+ [29] 0.9493679 0.9511684 0.9528781 0.9545540 0.9561672 0.9576417 0.9590967
+ [36] 0.9604884 0.9617499 0.9629820 0.9641558 0.9653133 0.9664090 0.9674598
+ [43] 0.9685000 0.9694554 0.9703802 0.9712597 0.9721246 0.9729357 0.9737255
+ [50] 0.9744994 0.9752521 0.9759928 0.9767030 0.9773643 0.9779878 0.9786008
+ [57] 0.9791835 0.9797604 0.9803110 0.9808550 0.9813886 0.9818710 0.9823488
+ [64] 0.9828155 0.9832769 0.9837314 0.9841641 0.9845835 0.9849875 0.9853870
+ [71] 0.9857777 0.9861560 0.9865301 0.9868880 0.9872381 0.9875805 0.9879188
+ [78] 0.9882319 0.9885414 0.9888406 0.9891324 0.9894175 0.9896927 0.9899638
+ [85] 0.9902300 0.9904871 0.9907390 0.9909797 0.9912165 0.9914507 0.9916759
+ [92] 0.9918947 0.9921120 0.9923244 0.9925301 0.9927351 0.9929322 0.9931224
+ [99] 0.9933115 0.9934985 0.9936803 0.9938607 0.9940320 0.9941968 0.9943592
+[106] 0.9945167 0.9946732 0.9948246 0.9949727 0.9951150 0.9952568 0.9953953
+[113] 0.9955330 0.9956650 0.9957967 0.9959192 0.9960413 0.9961612 0.9962790
+[120] 0.9963912 0.9965032 0.9966126 0.9967205 0.9968253 0.9969269 0.9970256
+[127] 0.9971225 0.9972177 0.9973118 0.9974023 0.9974898 0.9975769 0.9976610
+[134] 0.9977421 0.9978219 0.9978996 0.9979759 0.9980502 0.9981231 0.9981936
+[141] 0.9982629 0.9983295 0.9983945 0.9984584 0.9985187 0.9985781 0.9986372
+[148] 0.9986944 0.9987503 0.9988039 0.9988537 0.9989028 0.9989513 0.9989981
+[155] 0.9990444 0.9990880 0.9991304 0.9991718 0.9992124 0.9992512 0.9992891
+[162] 0.9993254 0.9993610 0.9993956 0.9994287 0.9994605 0.9994905 0.9995203
+[169] 0.9995494 0.9995782 0.9996056 0.9996309 0.9996559 0.9996802 0.9997033
+[176] 0.9997241 0.9997436 0.9997625 0.9997812 0.9997989 0.9998156 0.9998322
+[183] 0.9998474 0.9998620 0.9998760 0.9998889 0.9999017 0.9999138 0.9999252
+[190] 0.9999363 0.9999468 0.9999565 0.9999656 0.9999741 0.9999819 0.9999891
+[197] 0.9999935 0.9999969 1.0000000 1.0000000
+> pc1_FPKM = pcAnalysis_FPKM$x[, 1]
+> pc2_FPKM = pcAnalysis_FPKM$x[, 2]
+> pc3_FPKM = pcAnalysis_FPKM$x[, 3]
+> 
+> resultsPath = '/export/home/xurren/WTCProject/Results/'
+> pdf(file = paste(resultsPath, "PC_plots_for_FPKM.pdf", sep = ''), width=10, height=10)
+> df1_FPKM = data.frame(PC1=pc1_FPKM, PC2=pc2_FPKM)
+> p1_FPKM = ggplot(df1_FPKM, aes(x=PC1, y=PC2, color = batch)) + geom_point()
+> df2_FPKM = data.frame(PC1=pc1_FPKM, PC3=pc3_FPKM)
+> p2_FPKM = ggplot(df2_FPKM, aes(x=PC1, y=PC3, color = batch)) + geom_point()
+> df3_FPKM = data.frame(PC2=pc2_FPKM, PC3=pc3_FPKM)
+> p3_FPKM = ggplot(df3_FPKM, aes(x=PC2, y=PC3, color = batch)) + geom_point()
+> grid.arrange(p1_FPKM, p2_FPKM, p3_FPKM, ncol=2, top = "PC plots FPKM")
+> dev.off()
+null device 
+          1 
+> 
+> ##############################################################################################################################
+> 
+> ##  check outliers
+> resultsPath = '/export/home/xurren/WTCProject/Results/'
+> pdf(file = paste(resultsPath, "PC_plots_check_outliers.pdf", sep = ''), width=10, height=10)
+> p1_label = ggplot(df1, aes(x=PC1, y=PC2, color = batch, label = colnames(topDevianceGene))) + geom_point() + geom_text(size = 2, aes(label = colnames(topDevianceGene)), hjust = 0.5, vjust = -0.5)
+> p2_label = ggplot(df2, aes(x=PC1, y=PC3, color = batch, label = colnames(topDevianceGene))) + geom_point() + geom_text(size = 2, aes(label = colnames(topDevianceGene)), hjust = 0.5, vjust = -0.5)
+> p3_label = ggplot(df3, aes(x=PC2, y=PC3, color = batch, label = colnames(topDevianceGene))) + geom_point() + geom_text(size = 2, aes(label = colnames(topDevianceGene)), hjust = 0.5, vjust = -0.5)
+> # grid.arrange(p1_label, p2_label, p3_label, ncol=2, top = "PC plots for normalized counts with sample labels")
+> grid.arrange(p1_label, p2_label, p3_label, ncol=2, top = "PC plots for normalized exon counts with sample labels")
+> p1_FPKM = ggplot(df1_FPKM, aes(x=PC1, y=PC2, color = batch, label = colnames(topDevianceGene_FPKM))) + geom_point() + geom_text(size = 2, aes(label = colnames(topDevianceGene_FPKM)), hjust = 0.5, vjust = -0.5)
+> p2_FPKM = ggplot(df2_FPKM, aes(x=PC1, y=PC3, color = batch, label = colnames(topDevianceGene_FPKM))) + geom_point() + geom_text(size = 2, aes(label = colnames(topDevianceGene_FPKM)), hjust = 0.5, vjust = -0.5)
+> p3_FPKM = ggplot(df3_FPKM, aes(x=PC2, y=PC3, color = batch, label = colnames(topDevianceGene_FPKM))) + geom_point() + geom_text(size = 2, aes(label = colnames(topDevianceGene_FPKM)), hjust = 0.5, vjust = -0.5)
+> grid.arrange(p1_FPKM, p2_FPKM, p3_FPKM, ncol=2, top = "PC plots FPKM with sample labels")
+> dev.off()
+null device 
+          1 
+> 
+> 
+> proc.time()
+   user  system elapsed 
+ 21.035   0.465  21.608 

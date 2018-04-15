@@ -1,0 +1,22 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1523415811358.000,
+    "dirty" : true,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "E12CC6B4",
+    "lastKnownWriteTime" : 1504492218,
+    "last_content_update" : 1523415815246,
+    "path" : "~/My/Study/Work/Renxu/DESeq2_adj_age_race_smoke_09.03.2017.R",
+    "project_path" : "Renxu/DESeq2_adj_age_race_smoke_09.03.2017.R",
+    "properties" : {
+        "cursorPosition" : "34,9",
+        "scrollLine" : "22"
+    },
+    "relative_order" : 13,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

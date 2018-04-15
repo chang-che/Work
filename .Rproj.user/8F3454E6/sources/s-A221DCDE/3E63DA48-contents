@@ -1,0 +1,79 @@
+> ls()
+[1] "MDD"
+> library(edgeR)
+Loading required package: limma
+> MDD <- read.table(file = '/export/home/pfkuan/WTCproject/Epigenetics/Data/levinsonNIMH_MDD_EQTL_Covariates/data_used_for_eqtl_study/raw_counts.txt', header = T, sep = '\t')
+
+> 
+> MDD1 <- MDD[,-ncol(MDD)]
+> MDD_numeric = apply(MDD1[,2:ncol(MDD1)], 2, as.numeric)
+> load(file = '/export/home/xurren/WTCProject/Data/rpkm_and_length_MDDdata.RData')
+> ls()
+[1] "length.info" "MDD"         "MDD_numeric" "MDD1"        "rpkm"       
+> dim(length.info)
+NULL
+> length(length.info)
+[1] 15231
+> dim(MDD_numeric)
+[1]   922 15231
+> class(length.info)
+[1] "numeric"
+> mode(length.info)
+[1] "numeric"
+> is.list(length.info)
+[1] FALSE
+> names(length.info)[1:5
++ ]
+[1] "MTVR2"     "CHMP1B"    "LOC441204" "TCOF1"     "LOC441208"
+> colnames(MDD_numeric)[1:5]
+[1] "MTVR2"     "CHMP1B"    "LOC441204" "TCOF1"     "LOC441208"
+> sum(is.na(length.info))
+[1] 485
+> sum(length.info>0)
+[1] NA
+> gene_length = length.info[!is.na(length.info)]
+> length(gene_length)
+[1] 14746
+> sum(gene_length>0)
+[1] 14746
+> MDD2 = MDD_numeric[,colnames(MDD_numeric) %in% names(gene_length)]
+> dim(MDD2)
+[1]   922 14746
+> x = rpkm(t(MDD_numeric),gene_length)
+Warning message:
+In y/gene.length.kb :
+  longer object length is not a multiple of shorter object length
+> names(MDD_numeric) == names(gene_length)
+logical(0)
+> names(MDD2) == names(gene_length)
+logical(0)
+> identical(colnames(MDD2),names(gene_length))
+[1] TRUE
+> x = rpkm(t(MDD2),gene_length)
+> dim(x)
+[1] 14746   922
+> MDD3 = t(x)
+> MDD3 = as.data.frame(MDD3)
+> MDD3 = cbind(MDD1[,1], MDD3)
+
+
+DX = read.table(file = '/export/home/pfkuan/WTCproject/Epigenetics/Data/levinsonNIMH_MDD_EQTL_Covariates/data_used_for_MDD_analysis/Dx_Case_status.txt', header = T, sep = '\t')
+# this is strange because the despiction says control is 0 and MDD is 1.
+> summary(DX)
+       ID        MDD.status   
+ LD0001 :  1   Min.   :1.000  
+ LD0002 :  1   1st Qu.:1.000  
+ LD0003 :  1   Median :2.000  
+ LD0006 :  1   Mean   :1.502  
+ LD0007 :  1   3rd Qu.:2.000  
+ LD0008 :  1   Max.   :2.000  
+ (Other):916                  
+> str(DX)
+'data.frame':	922 obs. of  2 variables:
+ $ ID        : Factor w/ 922 levels "LD0001","LD0002",..: 11 30 28 62 19 25 6 20 118 34 ...
+ $ MDD.status: int  1 1 1 1 1 1 1 1 1 1 ...
+> identical(MDD3[,1], DX$ID)
+[1] TRUE
+>MDD3 = cbind(MDD3, DX$MDD.status)
+save(MDD3,file =  '/export/home/chche/WTC_Project/Data/MDD3.Rdata')
+

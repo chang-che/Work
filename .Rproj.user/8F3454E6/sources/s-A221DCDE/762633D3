@@ -1,0 +1,23 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1523323625856.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "762633D3",
+    "lastKnownWriteTime" : 1523410777,
+    "last_content_update" : 1523410777091,
+    "path" : "~/My/Study/Work/April_9th_MDD.R",
+    "project_path" : "April_9th_MDD.R",
+    "properties" : {
+        "cursorPosition" : "106,9",
+        "scrollLine" : "89",
+        "tempName" : "Untitled4"
+    },
+    "relative_order" : 10,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

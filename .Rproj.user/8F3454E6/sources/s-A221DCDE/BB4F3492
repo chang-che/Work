@@ -1,0 +1,22 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1521468146141.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "BB4F3492",
+    "lastKnownWriteTime" : 1521509143,
+    "last_content_update" : 1521509143111,
+    "path" : "~/My/Study/Work/mar_19th_remMap.R",
+    "project_path" : "mar_19th_remMap.R",
+    "properties" : {
+        "cursorPosition" : "13,17",
+        "scrollLine" : "0"
+    },
+    "relative_order" : 5,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
