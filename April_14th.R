@@ -8,6 +8,10 @@ MDDstat <- read.table('/export/home/pfkuan/WTCproject/Epigenetics/Data/levinsonN
 MDD <- as.factor(MDDstat$MDD.status)
 all_cov = cbind(MDD,tech_cov[,-1],bio_cov[,-1])
 
+
+for (i in factor.choice){
+  all_cov_factor[,i] = factor(all_cov_factor[,i])
+}
 x <- paste(colnames(all_cov) ,collapse = '+')
 fomu = as.formula(paste('~',x))
 x = DESeqDataSetFromMatrix(countData = t(MDD_inte), 
