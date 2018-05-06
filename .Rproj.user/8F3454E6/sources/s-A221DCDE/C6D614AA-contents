@@ -1,7 +1,0 @@
-dim(xcell)
-xcell[1:5,1:5]
-covariates <- as.character(xcell[,1])
-str(xcell)
-class(covariates)
-x <- paste(colnames(all_cov) ,collapse = '+')
-y = as.formula(paste('~',x))

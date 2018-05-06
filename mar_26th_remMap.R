@@ -111,7 +111,7 @@ lamL1.string = 'exp(seq(log(0.1),log(40), length=40))'
 lamL2.string = 'seq(0,40, length=41)'
 lamL1.v = eval(parse(text = lamL1.string)) 
 lamL2.v = eval(parse(text = lamL2.string))
-
+contour(x = l1, y = l2, z = cv.list$ols.cv)
 test_list <- test_list[1:nloop]
 remMapCV <- function(trainID){
   cv.list = remMap.CV(X.m1[trainID,], Y.m1[trainID,], lamL1.v, lamL2.v, C.m=NULL, fold=10, seed=1000)

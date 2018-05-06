@@ -38,7 +38,7 @@ load(file = '/export/home/chche/WTC_Project/Data/multiplot.Rdata')
 
 load(file = '/export/home/chche/WTC_Project/Data/clinical533_02_17_2018.RData')  ## load clinical data
 load(file="/export/home/chche/WTC_Project/Data/ExonCountsNormalize533.RData")   ## load normalized exoncounts
-load(file = '/export/home/chche/WTC_Project/Data/exon330_genefilter.RData') 
+load(file = '/export/home/chche/WTC_Project/Data/exon330_genefilter.RData') ## exclude low counts 
 load(file ='/export/home/chche/WTC_Project/Data/train_test_ID_12_14_2017.RData')
 ####################################################################################
 # trying remMap on "PCL", "PHQ9", "LRS_total"
@@ -89,7 +89,7 @@ lamL2.pick=cv.list$l.index[2,pick]
 save(cv.list, file = '/export/home/chche/WTC_Project/Data/remMapCV.Rdata')
 ?contour
 plot(contour(x = exp(seq(log(0.1),log(40), length=40)), y =seq(0,40, length=41), z = cv.index.matrix,
-     xlim = c(0.1, 40), ylim = c(0,40),zlim = range(cv.index.matrix), levels = pretty(range(cv.index.matrix), 1000)))
+             xlim = c(0.1, 40), ylim = c(0,40),zlim = range(cv.index.matrix), levels = pretty(range(cv.index.matrix), 1000)))
 # Transform data to long form
 ols.melt <- melt(cv.list$ols.cv, id.vars = c('l1', 'l2'), measure.vars = 'ols')
 names(mtrx.melt) <- c('l1', 'l2', 'ols')
